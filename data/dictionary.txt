@@ -1,0 +1,47 @@
+The file behaghel.csv is derived from the replication package of Behaghel et. al (2014). It is produced by following the stata code included therein to reproduce their tables in order to process variables from the included stat dataset and output the processed variable into csv. The following data dictionary for behaghel.csv is approximate and is merely inferred from reading and cross-referencing the paper by Behaghel et al., the partial labels (in French) in the stata dataset included in their replication package, and the stata code for reproducing their tables included in their replication package.
+
+sw - sample weight
+A_public - indicator of treatment with public counseling program
+A_private - indicator of treatment with private counseling program
+A_standard - indicator of treatment with standard benefits
+Y - indicator of re-employment at 6 months
+College_education - indicator of college education
+nivetude2 - indicator of high school education (le Bac)
+Vocational - indicator of vocational education
+High_school_dropout - indicator of high school dropout
+Manager - indicator of job type = manager
+Technician - indicator of job type = technician
+Skilled_clerical_worker - indicator of job type = skilled clerical worker
+Unskilled_clerical_worker - indicator of job type = unskilled clerical worker
+Skilled_blue_colar - indicator of job type = skilled blue-collar worker
+Unskilled_blue_colar - indicator of job type = unskilled blue-collar worker
+Woman - indicator of being woman
+Married - indicator of being married
+French - indicator of national origin being French
+African - indicator of national origin being African country
+Other_Nationality - indicator of national being coded as other
+Paris_region - indicator of residence being Paris region
+North - indicator of residence being one of north regions
+Other_regions - indicator of residence being other region
+Employment_component_level_1 - indicator of employment index (composante emploi) being level 1
+Employment_component_level_2 - indicator of employment index (composante emploi) being level 2
+Employment_component_missing - indicator of employment index (composante emploi) being missing
+Economic_Layoff - indicator for reason for unemployment being economic layoff
+Personnal_Layoff - indicator for reason for unemployment being personal layoff
+End_of_Fixed_Term_Contract - indicator for reason for unemployment being end of fixed-term contract
+End_of_Temporary_Work - indicator for reason for unemployment being end of temporary work
+Other_reasons_of_unemployment - indicator for reason for unemployment being other
+Statistical_risk_level_2 - indicator for statistical unemployment risk being level 2
+Statistical_risk_level_3 - indicator for statistical unemployment risk being level 3
+Other_Statistical_risk - indicator for statistical unemployment risk being other
+Search_for_a_full_time_position - indicator for individual seeking full time employment
+Sensitive_suburban_area - indicator for coming from a sensitive suburban area
+Insertion - indicator of international job placement firm
+Interim - indicator of temporary help agency
+Conseil - indicator of consultancy specialized in the placement of unemployed job seekers
+age - age of individual
+Number_of_children - number of children of individual
+exper - years of experience on the job
+salaire.num - target salary sought by individual
+mois_saisie_occ - when individual was assigned benefits
+ndem - number of the present unemployment spell (how many previous + 1)

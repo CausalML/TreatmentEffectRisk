@@ -4,12 +4,7 @@ library(latex2exp)
 library(gbm)
 library(cmna)
 
-job_org = read.csv('behaghel.csv')
-job = job_org %>% filter(POIDS_PZ_6MOIS>0) %>% mutate(A_standard = CLA, A_private = OPP, A_public = CVE, Y = EMPLOI_6MOIS) %>% mutate(sw = POIDS_PZ_6MOIS, ipw = 1. / (A_standard*mean(sw*A_standard) + A_private*mean(sw*A_private) + A_public*mean(sw*A_public)))
-
-# Prep covariates
-
-job = job %>% mutate(salaire.num = (salaire=='G')*0+(salaire=='A')*1+(salaire=='B')*2+(salaire=='C')*3+(salaire=='D')*4+(salaire=='E')*5)
+job = read.csv('data/behaghel.csv')
 
 Xbin = c(
   'College_education',
@@ -143,13 +138,26 @@ CVaR = foreach(p=ps, .combine=rbind) %do% {
   q = wtdquantile(job_binary$tau,job_binary$sw,p) 
   job_binary %>% mutate(IF = q + (mu1-mu0+(2*A-1)*ipw*(Y-A*mu1-(1-A)*mu0)-q)*(tau<=q)/p) %>% summarise(p=p, CVaR = mean(sw*IF,na.rm=T), CVaR.se = sd(sw*IF,na.rm=T)/sqrt(n()))
 }
-job_cvar = CVaR %>% mutate(CVaR=rearrangement(list(ps),CVaR,n=1000)) %>% ggplot + aes(x=p,y=CVaR,ymax=CVaR+zz*CVaR.se,ymin=CVaR-zz*CVaR.se)+ geom_line() + geom_point() + geom_ribbon(alpha=0.5) + ylab(TeX('$\\mathrm{CVaR}_{\\alpha}$')) + xlab(TeX('$\\alpha$'))
+job_cvar = CVaR %>% mutate(CVaR=rearrangement(list(ps),CVaR,n=1000)) %>% ggplot + aes(x=p,y=CVaR,ymax=CVaR+zz*CVaR.se,ymin=CVaR-zz*CVaR.se)+ geom_line() + geom_point() + geom_ribbon(alpha=0.5) + ylab(TeX('${CVaR}_{\\alpha}$')) + xlab(TeX('$\\alpha$'))
 job_cvar
-ggsave('job_cvar.pdf', plot=job_cvar, dpi = 300, height = 3.8, width = 4.2)  
+# Produce Figure 1
+ggsave('job_cvar.pdf', plot=job_cvar, dpi = 300, height = 3.8, width = 6.3)  
 
-job_cvar_notrearranged = CVaR %>% ggplot + aes(x=p,y=CVaR,ymax=CVaR+zz*CVaR.se,ymin=CVaR-zz*CVaR.se)+ geom_line() + geom_point() + geom_ribbon(alpha=0.5) + ylab(TeX('$\\mathrm{CVaR}_{\\alpha}$')) + xlab(TeX('$\\alpha$'))
+job_cvar_notrearranged = CVaR %>% ggplot + aes(x=p,y=CVaR,ymax=CVaR+zz*CVaR.se,ymin=CVaR-zz*CVaR.se)+ geom_line() + geom_point() + geom_ribbon(alpha=0.5) + ylab(TeX('${CVaR}_{\\alpha}$')) + xlab(TeX('$\\alpha$'))
 job_cvar_notrearranged
+# Produce Figure EC.1
 ggsave('job_cvar_notrearranged.pdf', plot=job_cvar_notrearranged, dpi = 300, height = 3.8, width = 6.3)  
+
+
+CVaR.plugin = foreach(p=ps, .combine=rbind) %do% {
+  q = wtdquantile(job_binary$tau,job_binary$sw,p) 
+  job_binary %>% mutate(IF = q + (tau-q)*(tau<=q)/p) %>% summarise(p=p, CVaR = mean(sw*IF,na.rm=T), CVaR.se = sd(sw*IF,na.rm=T)/sqrt(n()))
+}
+job_cvar.plugin = CVaR.plugin %>% ggplot + aes(x=p,y=CVaR,ymax=CVaR+zz*CVaR.se,ymin=CVaR-zz*CVaR.se)+ geom_line() + geom_point() + geom_ribbon(alpha=0.5) + ylab(TeX('${CVaR}_{\\alpha}$')) + xlab(TeX('$\\alpha$'))
+job_cvar.plugin
+# Produce Figure 3
+ggsave('job_cvar_plugin.pdf', plot=job_cvar.plugin, dpi = 300, height = 3.8, width = 6.3)
+
 
 # CVaR(tau) with bad controls
 Xbad = c('age','Paris_region','African','High_school_dropout')
@@ -161,18 +169,20 @@ CVaR.bad = foreach(p=ps, .combine=rbind) %do% {
   q = wtdquantile(job_binary$tau.bad,job_binary$sw,p) 
   job_binary %>% mutate(IF = q + (mu1-mu0+(2*A-1)*ipw*(Y-A*mu1-(1-A)*mu0)-q)*(tau.bad<=q)/p) %>% summarise(p=p, CVaR = mean(sw*IF,na.rm=T), CVaR.se = sd(sw*IF,na.rm=T)/sqrt(n()))
 }
-job_cvar.bad = CVaR.bad %>% mutate(CVaR=rearrangement(list(ps),CVaR,n=1000)) %>% ggplot + aes(x=p,y=CVaR,ymax=CVaR+zz*CVaR.se,ymin=CVaR-zz*CVaR.se)+ geom_line() + geom_point() + geom_ribbon(alpha=0.5) + ylab(TeX('$\\mathrm{CVaR}_{\\alpha}$')) + xlab(TeX('$\\alpha$'))
+job_cvar.bad = CVaR.bad %>% mutate(CVaR=rearrangement(list(ps),CVaR,n=1000)) %>% ggplot + aes(x=p,y=CVaR,ymax=CVaR+zz*CVaR.se,ymin=CVaR-zz*CVaR.se)+ geom_line() + geom_point() + geom_ribbon(alpha=0.5) + ylab(TeX('${CVaR}_{\\alpha}$')) + xlab(TeX('$\\alpha$'))
 job_cvar.bad
-ggsave('job_cvar_bad.pdf', plot=job_cvar.bad, dpi = 300, height = 3.8, width = 4.2)  
+# Produce Figure 4
+ggsave('job_cvar_bad.pdf', plot=job_cvar.bad, dpi = 300, height = 3.8, width = 6.3)  
 
 # CVaR(tau)-ATE
 CVaRmATE = foreach(p=ps, .combine=rbind) %do% {
   q = wtdquantile(job_binary$tau,job_binary$sw,p) 
   job_binary %>% mutate(IF = q + (mu1-mu0+(2*A-1)*ipw*(Y-A*mu1-(1-A)*mu0))*((tau<=q)/p-1) - q*(tau<=q)/p) %>% summarise(p=p, CVaR = mean(sw*IF,na.rm=T), CVaR.se = sd(sw*IF,na.rm=T)/sqrt(n()))
 }
-job_cvarvsate = CVaRmATE %>% mutate(CVaR=rearrangement(list(ps),CVaR,n=1000)) %>% ggplot + aes(x=p,y=CVaR,ymax=CVaR+zz*CVaR.se,ymin=CVaR-zz*CVaR.se)+ geom_line() + geom_point() + geom_ribbon(alpha=0.5) + ylab(TeX('$\\mathrm{CVaR}_{\\alpha}-\\bar{\\tau}$')) + xlab(TeX('$\\alpha$'))
+job_cvarvsate = CVaRmATE %>% mutate(CVaR=rearrangement(list(ps),CVaR,n=1000)) %>% ggplot + aes(x=p,y=CVaR,ymax=CVaR+zz*CVaR.se,ymin=CVaR-zz*CVaR.se)+ geom_line() + geom_point() + geom_ribbon(alpha=0.5) + ylab(TeX('${CVaR}_{\\alpha}-\\bar{\\tau}$')) + xlab(TeX('$\\alpha$'))
 job_cvarvsate
-ggsave('job_cvarvsate.pdf', plot=job_cvarvsate, dpi = 300, height = 3.8, width = 4.2)  
+# Produce Figure 2
+ggsave('job_cvarvsate.pdf', plot=job_cvarvsate, dpi = 300, height = 3.8, width = 6.3)  
 
 # Range-based bounds vs ATE
 bs = seq(0,.25,.05)
@@ -187,8 +197,9 @@ job_bounded_bounds = rbind(
   foreach(b=bs, .combine=rbind) %do% { CVaRmATE %>% mutate(CVaR = (CVaR-b)*(p<1), b=b, Type='Thm. 3.3') } %>% filter(b>0)
 ) %>% mutate(Type = factor(Type, levels=c('CATE-CVaR','Thm. 3.2','Thm. 3.3')),
              b = factor(b, levels=c('NA',bs[bs>0]))) %>%
-  group_by(b,Type)  %>% mutate(CVaR=rearrangement(list(ps),CVaR,n=1000)) %>% ggplot + aes(x=p,y=CVaR,ymax=CVaR+zz*CVaR.se,ymin=CVaR-zz*CVaR.se,color=b,fill=b,shape=Type) + geom_line() + geom_point() + geom_ribbon(alpha=0.5,color=NA) + ylab(TeX('$\\mathrm{CVaR}_{\\alpha}-\\bar{\\tau}$')) + xlab(TeX('$\\alpha$'))
+  group_by(b,Type)  %>% mutate(CVaR=rearrangement(list(ps),CVaR,n=1000)) %>% ggplot + aes(x=p,y=CVaR,ymax=CVaR+zz*CVaR.se,ymin=CVaR-zz*CVaR.se,color=b,fill=b,shape=Type) + geom_line() + geom_point() + geom_ribbon(alpha=0.5,color=NA) + ylab(TeX('${CVaR}_{\\alpha}-\\bar{\\tau}$')) + xlab(TeX('$\\alpha$'))
 job_bounded_bounds
+# Produce Figure 5
 ggsave('job_bounded_bounds.pdf', plot=job_bounded_bounds, dpi = 300, height = 3.8, width = 6.3)  
 
 
@@ -206,7 +217,7 @@ CVaR.sbound.mATE = foreach(p=ps, .combine=rbind) %do% { foreach(rho=rhos, .combi
   job_binary %>% mutate(IF = -(mu1-mu0+(2*A-1)*ipw*(Y-A*mu1-(1-A)*mu0)) + q + (tau-q-sqrt((tau-q)^2+varsum01-2*rho*sdprod01))/(2*p) + (1-(tau-q)/sqrt((tau-q)^2+varsum01-2*rho*sdprod01))*(2*A-1)*ipw*(Y-A*mu1-(1-A)*mu0)/(2*p) ) %>% 
     summarise(p=p, rho=rho, CVaR = mean(sw*IF,na.rm=T), CVaR.se = sd(sw*IF,na.rm=T)/sqrt(n()))
 }}
-CVaR.sbound.mATE %>% mutate(rho=as.factor(rho)) %>% filter(p>.25) %>% ggplot + aes(x=p,y=CVaR,ymax=CVaR+zz*CVaR.se,ymin=CVaR-zz*CVaR.se,color=rho) + geom_line() + geom_point() + geom_ribbon(alpha=0.5) + ylab(TeX('$\\mathrm{CVaR}_{\\alpha}(\\tau(X))-\\bar\\tau$')) + xlab(TeX('$\\alpha$'))
+CVaR.sbound.mATE %>% mutate(rho=as.factor(rho)) %>% filter(p>.25) %>% ggplot + aes(x=p,y=CVaR,ymax=CVaR+zz*CVaR.se,ymin=CVaR-zz*CVaR.se,color=rho) + geom_line() + geom_point() + geom_ribbon(alpha=0.5) + ylab(TeX('${CVaR}_{\\alpha}(\\tau(X))-\\bar\\tau$')) + xlab(TeX('$\\alpha$'))
 
 job_condvar_bounds = rbind(
   CVaRmATE %>% mutate(rho='NA', type='CATE-CVaR'),
@@ -217,9 +228,10 @@ job_condvar_bounds = rbind(
              Correlation = factor(rho, levels=c('NA',rev(rhos)))) %>%
   group_by(rho,type) %>% mutate(CVaR=rearrangement(list(ps),CVaR,n=1000)) %>% filter(p>=.7) %>%
   ggplot + aes(x=p,y=CVaR,ymax=CVaR+zz*CVaR.se,ymin=CVaR-zz*CVaR.se,color=Correlation,fill=Correlation,shape=Type) + geom_line() + geom_point() + geom_ribbon(alpha=0.5,color=NA) +
-  ylab(TeX('$\\mathrm{CVaR}_{\\alpha}-\\bar{\\tau}$')) + xlab(TeX('$\\alpha$')) +
+  ylab(TeX('${CVaR}_{\\alpha}-\\bar{\\tau}$')) + xlab(TeX('$\\alpha$')) +
   guides(shape=guide_legend(title='Type',order=1)) + guides(color=guide_legend(title=TeX('$\\rho$'),order=2),fill=guide_legend(title=TeX('$\\rho$'),order=2))
 job_condvar_bounds
+# Produce Figure 6
 ggsave('job_condvar_bounds.pdf', plot=job_condvar_bounds+theme(legend.spacing.y = unit(0.1, "cm")), dpi = 300, height = 3.8, width = 6.3)  
 
 # CVaR treatment effect  
@@ -235,4 +247,5 @@ CVaR.TE %>% mutate(cvar=cvar0, cvar.se=cvar0.se, Group='A=0'),
 CVaR.TE %>% mutate(cvar=cvar.te, cvar.se=cvar.te.se, Group='Diff')
 ) %>% ggplot + aes(x=p, y=cvar,ymax=cvar+zz*cvar.se,ymin=cvar-zz*cvar.se,color=Group,fill=Group)+ geom_line() + geom_point() + geom_ribbon(alpha=0.5,color=NA) + ylab('CVaR') + xlab('alpha')
 job_cvar_te
+# Produce Figure EC.2
 ggsave('job_cvar_te.pdf', plot=job_cvar_te, dpi = 300, height = 3.8, width = 6.3)  
