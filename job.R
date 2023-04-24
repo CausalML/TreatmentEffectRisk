@@ -3,6 +3,7 @@ library(foreach)
 library(latex2exp)
 library(gbm)
 library(cmna)
+library(Rearrangement)
 
 job = read.csv('data/behaghel.csv')
 
