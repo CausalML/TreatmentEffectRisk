@@ -1,3 +1,12 @@
+# To be run with:
+# R version 4.3.0 (2023-04-21)
+# Rearrangement_2.1 quantreg_5.95     SparseM_1.81      cmna_1.0.5       
+# gbm_2.1.8.1       latex2exp_0.9.6   foreach_1.5.2     lubridate_1.9.2  
+# forcats_1.0.0     stringr_1.5.0     dplyr_1.1.2       purrr_1.0.1      
+# readr_2.1.4       tidyr_1.3.0       tibble_3.2.1      ggplot2_3.4.2    
+# tidyverse_2.0.0  
+
+
 library(tidyverse)
 library(foreach)
 library(latex2exp)
