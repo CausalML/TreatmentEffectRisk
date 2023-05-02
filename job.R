@@ -135,8 +135,12 @@ Rsquared    = job_binary %>% group_by(A) %>% summarise(condvar = mean(sw*(Y-A*mu
 correction2 = Rsquared %>% summarise(sum(sqrt(condvar))) %>% pull
 
 wtdquantile = function(y,w,g) {
-  o = order(y)
-  y[o[which(cumsum(w[o])>=sum(w)*g)[1]]]
+  if(g>=1) {
+    max(y)
+  } else {
+    o = order(y)
+    y[o[which(cumsum(w[o])>=sum(w)*g)[1]]]
+  }
 }
 
 ps = seq(0.01, 1, 0.01)
